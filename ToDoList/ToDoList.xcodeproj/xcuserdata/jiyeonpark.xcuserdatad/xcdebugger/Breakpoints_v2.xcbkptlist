@@ -7,32 +7,32 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "C1E69919-F0D3-488F-8882-00F0F9BE159C"
-            shouldBeEnabled = "Yes"
+            uuid = "ACAD5850-EA44-4F11-AC7C-72B840002EB9"
+            shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "ToDoList/ViewController/MainViewController.swift"
+            filePath = "ToDoList/ViewComponent/TodoCell.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "53"
-            endingLineNumber = "53"
-            landmarkName = "bind()"
+            startingLineNumber = "104"
+            endingLineNumber = "104"
+            landmarkName = "setData(todo:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "A9A52DF3-C9D6-4D26-A296-B136ECE94BBB"
-            shouldBeEnabled = "Yes"
+            uuid = "1C2E8D3E-B566-44E5-9867-3797CCB1A5E1"
+            shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "ToDoList/ViewController/MainViewController.swift"
+            filePath = "ToDoList/ViewComponent/TodoCell.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "50"
-            endingLineNumber = "50"
-            landmarkName = "bind()"
+            startingLineNumber = "102"
+            endingLineNumber = "102"
+            landmarkName = "setData(todo:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

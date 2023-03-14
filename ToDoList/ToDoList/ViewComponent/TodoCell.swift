@@ -53,6 +53,7 @@ class TodoCell: UITableViewCell {
     }
     
     private func initUI() {
+        selectionStyle = .none
         backgroundColor = .systemGray5
         
         checkImageView.snp.makeConstraints({ make in
@@ -90,7 +91,12 @@ class TodoCell: UITableViewCell {
 //            .disposed(by: disposeBag)
     }
     
-    
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        
+        checkImageView.image = UIImage(systemName: "circle")
+        label.attributedText = nil
+    }
     
     func setData(todo: ToDo) {
         switch todo.isDone {

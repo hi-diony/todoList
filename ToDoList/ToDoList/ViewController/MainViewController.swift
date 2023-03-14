@@ -36,6 +36,10 @@ class MainViewController: UIViewController {
     }()
     
     private let disposeBag = DisposeBag()
+    private var sections = BehaviorSubject(value: [
+        AnimatableSectionModel(model: Section.Todo.sectionTitle, items: [ToDo]()),
+        AnimatableSectionModel(model: Section.Done.sectionTitle, items: [ToDo]())
+    ])
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -45,72 +49,185 @@ class MainViewController: UIViewController {
     }
     
     private func bind() {
-        /// 데이터
         guard let realm = try? Realm() else {
             return
         }
-        
-        let todos = realm.objects(ToDo.self)
-            .sorted(byKeyPath: "createdAt", ascending: false)
-        
+
         /// 테이블뷰
         // tableView와 Realm 바인딩 : https://stackoverflow.com/questions/48577819/how-to-bind-realm-object-to-uiswitch-using-rxswift-and-rxrealm
-        Observable.changeset(from: todos)
+        let allTodos = realm.objects(ToDo.self)
+        Observable.changeset(from: allTodos)
             .subscribe(with: self,
                        onNext: { owner, realmChanges in
-//                let results = realmChanges.0
-                guard let changes = realmChanges.1 else {
-                    owner.tableView.reloadData()
+                let results = realmChanges.0
+                guard var sections = try? owner.sections.value() else {
                     return
                 }
-//                
-//                let todo = results.filter({ $0.finishedAt == nil })
-//                let finished = results.filter({ $0.finishedAt != nil })
-//                let sections = [
-//                    SectionModel(model: "TO DO (\(todo.count))", items: todo),
-//                    SectionModel(model: "DONE (\(finished.count))", items: finished)
-//                ]
-//                
-                owner.tableView.beginUpdates()
-                owner.tableView.deleteRows(at: changes.deleted.map { IndexPath(row: $0, section: 0) }, with: .automatic)
-                owner.tableView.insertRows(at: changes.inserted.map { IndexPath(row: $0, section: 0) }, with: .automatic)
-                owner.tableView.reloadRows(at: changes.updated.map { IndexPath(row: $0, section: 0) }, with: .automatic)
-                owner.tableView.endUpdates()
+                
+                let newTodo = results
+                            .where({ $0.finishedAt == nil })
+                            .sorted(byKeyPath: "createdAt", ascending: false)
+
+                let newFinished = results
+                            .where({ $0.finishedAt != nil })
+                            .sorted(byKeyPath: "finishedAt", ascending: false)
+
+                guard let changes = realmChanges.1 else {
+                    /// 변경사항이 없다면 (처음 초기값)
+                    sections = [
+                        AnimatableSectionModel(model: Section.Todo.sectionTitle, items: newTodo.map({ $0 })),
+                        AnimatableSectionModel(model: Section.Done.sectionTitle, items: newFinished.map({ $0 }))
+                    ]
+                    owner.sections.onNext(sections)
+                    return
+                }
+
+                let updateTodo = results.enumerated().compactMap({
+                    if changes.updated.contains($0.offset) {
+                        return $0.element
+                    }
+                    return nil
+                })
+
+                /// 초기값에서 변경사항이 존재함
+                /// Todo 리스트
+                var originalTodo = sections[Section.Todo.rawValue].items
+
+                // 삭제
+                let willDeleteTodoIndexs = Set(originalTodo).subtracting(newTodo)
+                    .compactMap({
+                        originalTodo.firstIndex(of: $0)
+                    })
+                originalTodo.remove(atOffsets: IndexSet(willDeleteTodoIndexs))
+
+                // 삽입
+                let willInsertTodoIndexs = Set(newTodo).subtracting(originalTodo)
+                    .compactMap({
+                        newTodo.firstIndex(of: $0)
+                    })
+                willInsertTodoIndexs.forEach({ row in
+                    originalTodo.insert(newTodo[row], at: row)
+                })
+
+                // 업데이트
+                updateTodo.forEach({ willUpdatTodo in
+                    guard let index = originalTodo.firstIndex(where: { $0._id == willUpdatTodo._id }) else {
+                        return
+                    }
+                    originalTodo[index] = willUpdatTodo
+                })
+
+                sections[Section.Todo.rawValue] = AnimatableSectionModel(model: Section.Todo.sectionTitle, items: originalTodo)
+
+                /// Done 리스트
+                var originalFinished = sections[Section.Done.rawValue].items
+                // 삭제
+                let willDeleteFinishedIndexs = Set(originalFinished).subtracting(newFinished)
+                    .compactMap({
+                        originalFinished.firstIndex(of: $0)
+                    })
+                originalFinished.remove(atOffsets: IndexSet(willDeleteFinishedIndexs))
+
+                // 삽입
+                let willInsertFinishedIndexs = Set(newFinished).subtracting(originalFinished)
+                    .compactMap({
+                        newFinished.firstIndex(of: $0)
+                    })
+                willInsertFinishedIndexs.forEach({ row in
+                    originalFinished.insert(newFinished[row], at: row)
+                })
+
+                // 업데이트
+                updateTodo.forEach({ willUpdatTodo in
+                    guard let index = originalFinished.firstIndex(where: { $0._id == willUpdatTodo._id }) else {
+                        return
+                    }
+                    originalFinished[index] = willUpdatTodo
+                })
+
+                sections[Section.Done.rawValue] = AnimatableSectionModel(model: Section.Done.sectionTitle, items: originalFinished)
+
+                owner.sections.onNext(sections)
             })
             .disposed(by: disposeBag)
         
-        let dataSource = RxTableViewSectionedReloadDataSource<SectionModel<String, String>>(
-            configureCell: { (_, tv, indexPath, element) in
-                let cell = tv.dequeueReusableCell(withIdentifier: "Cell")!
-                cell.textLabel?.text = element
+        
+        // 데이터소스 추가(셀 설정)
+        let dataSource = RxTableViewSectionedAnimatedDataSource<AnimatableSectionModel<String, ToDo>>(
+            configureCell: { dataSource, tableView, indexPath, todo in
+                let cell: TodoCell = {
+                    guard let c = tableView.dequeueReusableCell(withIdentifier: TodoCell.IDENTIFIER) as? TodoCell else {
+                        return TodoCell()
+                    }
+                    return c
+                }()
+                
+                cell.setData(todo: todo)
                 return cell
             },
-            titleForHeaderInSection: { dataSource, sectionIndex in
-                return dataSource[sectionIndex].model
+            titleForHeaderInSection: { [weak self] dataSource, sectionIndex in
+                guard let self = self,
+                      let sectionTitle = Section(rawValue: sectionIndex)?.sectionTitle,
+                      let sections = try? self.sections.value() else {
+                    return ""
+                }
+                
+                return "\(sectionTitle) (\(sections[sectionIndex].items.count))"
+            },
+            canEditRowAtIndexPath: { _, _ in
+                return true
             }
         )
 
-        
-        
-        Observable.collection(from: todos)
-            .bind(to: tableView.rx.items(cellIdentifier: TodoCell.IDENTIFIER, cellType: TodoCell.self)) {
-                indexPath, todo, cell in
-
-                cell.selectionStyle = .none
-                cell.setData(todo: todo)
-            }
+        sections
+            .distinctUntilChanged() // 연달아 중복된 값이 올 경우 무시
+            .observe(on:MainScheduler.asyncInstance)
+            .bind(to: tableView.rx.items(dataSource: dataSource))
             .disposed(by: disposeBag)
+        
+        // 삭제
+        tableView.rx.itemDeleted
+            .bind(with: self,
+                  onNext: { owner, indexPath in
+                guard var section = try? owner.sections.value() else { return }
+                var updateSection = section[indexPath.section]
+                
+                // Update item
+                updateSection.items.remove(at: indexPath.item)
+                
+                // Update section
+                
+                section[indexPath.section] = updateSection
+                
+                // Emit
+                owner.sections.onNext(section)
+            })
+            .disposed(by: self.disposeBag)
         
         tableView.rx
             .itemSelected
             .subscribe(with: self,
                        onNext: { owner, indexPath in
+                // 해당 아이템이 터치될때마다 finish 상태가 바뀜
+                guard let sections = try? owner.sections.value() else {
+                    return
+                }
+                
+                let todo = sections[indexPath.section].items[indexPath.row]
                 guard let realm = try? Realm() else {
                     return
                 }
                 
                 try? realm.write {
-                    todos[indexPath.row].finishedAt = todos[indexPath.row].finishedAt == nil ? Date() : nil
+                    switch todo.isDone {
+                    case true:
+                        // 다시 TODO항목으로 추가된다면 생성일이 최근으로 바뀐다
+                        todo.createdAt = Date()
+                        todo.finishedAt = nil
+                        
+                    case false:
+                        todo.finishedAt = Date()
+                    }
                 }
             })
             .disposed(by: disposeBag)
@@ -171,3 +288,22 @@ class MainViewController: UIViewController {
         })
     }
 }
+
+extension MainViewController {
+    enum Section: Int, CaseIterable {
+        case Todo = 0
+        case Done
+        
+        var sectionTitle: String {
+            switch self {
+            case .Todo:
+                return "TODO"
+                
+            case .Done:
+                return "DONE"
+            }
+        }
+    }
+}
+
+
