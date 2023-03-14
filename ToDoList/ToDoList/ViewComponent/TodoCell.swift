@@ -17,86 +17,66 @@ class TodoCell: UITableViewCell {
     
     private let checkImageView = UIImageView()
     private let label = UILabel()
+    private let dateLabel: UILabel = {
+        let lb = UILabel()
+        lb.isHidden = true
+        lb.textAlignment = .right
+        lb.font = .preferredFont(forTextStyle: .caption1)
+        lb.textColor = .systemGray
+        return lb
+    }()
     
-    private let disposeBag = DisposeBag()
-//
-//    override var isSelected: Bool {
-//        didSet {
-//            switch isSelected {
-//            case false:
-//                checkImageView.image = UIImage(systemName: "circle")
-//                label.attributedText = label.attributedText?.string
-//                    .toMutableAttributedString()
-//                    .setFontColor(to: .label)
-//                    .removeCancelLine()
-//
-//            case true:
-//                checkImageView.image = UIImage(systemName: "checkmark.circle.fill")
-//                label.attributedText = label.attributedText?.string
-//                    .toMutableAttributedString()
-//                    .setFontColor(to: .systemGray4)
-//                    .setCancelLine(to: .systemGray4)
-//            }
-//        }
-//    }
-//
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         
         initUI()
-        
-        bind()
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
-    private func initUI() {
-        selectionStyle = .none
-        backgroundColor = .systemGray5
-        
-        checkImageView.snp.makeConstraints({ make in
-            make.height.greaterThanOrEqualTo(checkImageView.snp.width)
-        })
-//
-//        let textFieldContainerView = UIView()
-//        textFieldContainerView.addSubview(textField)
-//        textField.snp.makeConstraints({ make in
-//            make.edges.equalTo(UIEdgeInsets(top: 10, left: 0, bottom: 10, right: 0))
-//        })
-        
-        let stackView = UIStackView()
-        stackView.spacing = 10
-        stackView.axis = .horizontal
-        stackView.distribution = .fill
-        stackView.alignment = .fill
-        stackView.isLayoutMarginsRelativeArrangement = true
-        stackView.layoutMargins = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
-        stackView.addArrangedSubview(checkImageView)
-        stackView.addArrangedSubview(label)
-        contentView.addSubview(stackView)
-        
-        stackView.snp.makeConstraints({ make in
-            make.edges.equalToSuperview()
-        })
-    }
-    
-    private func bind() {
-//        checkButton.rx.tap
-//            .bind(with: self,
-//                  onNext: { owner, _ in
-//                owner.checkButton.isSelected.toggle()
-//            })
-//            .disposed(by: disposeBag)
+    deinit {
+        print("deinit \(classForCoder)")
     }
     
     override func prepareForReuse() {
         super.prepareForReuse()
         
-        checkImageView.image = UIImage(systemName: "circle")
+        checkImageView.image = nil
         label.attributedText = nil
+        
+        dateLabel.text = nil
+        dateLabel.isHidden = true
     }
+    
+    private func initUI() {
+        selectionStyle = .none
+        backgroundColor = .systemGray5
+        
+        contentView.addSubview(checkImageView)
+        checkImageView.snp.makeConstraints({ make in
+            make.width.height.equalTo(20)
+            make.left.equalToSuperview().offset(10)
+            make.centerY.equalToSuperview()
+        })
+        
+        let textStackView = UIStackView(arrangedSubviews: [label, dateLabel])
+        textStackView.spacing = 5
+        textStackView.axis = .vertical
+        textStackView.distribution = .fill
+        textStackView.alignment = .fill
+        textStackView.isLayoutMarginsRelativeArrangement = true
+        textStackView.layoutMargins = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 15)
+        
+        contentView.addSubview(textStackView)
+        
+        textStackView.snp.makeConstraints({ make in
+            make.top.bottom.right.equalToSuperview()
+            make.left.equalTo(checkImageView.snp.right)
+        })
+    }
+    
     
     func setData(todo: ToDo) {
         switch todo.isDone {
@@ -104,8 +84,13 @@ class TodoCell: UITableViewCell {
             checkImageView.image = UIImage(systemName: "checkmark.circle.fill")
             label.attributedText = todo.text
                 .toMutableAttributedString()
-                .setFontColor(to: .systemGray4)
-                .setCancelLine(to: .systemGray4)
+                .setFontColor(to: .systemGray3)
+                .setCancelLine(to: .systemGray3)
+                
+            if let finishTime = todo.finishedAt?.toString("yyyy.MM.dd HH:mm") {
+                dateLabel.text = finishTime
+                dateLabel.isHidden = false
+            }
             
         case false:
             checkImageView.image = UIImage(systemName: "circle")
@@ -113,6 +98,9 @@ class TodoCell: UITableViewCell {
                 .toMutableAttributedString()
                 .setFontColor(to: .label)
                 .removeCancelLine()
+            
+            dateLabel.text = nil
+            dateLabel.isHidden = true
         }
     }
 }

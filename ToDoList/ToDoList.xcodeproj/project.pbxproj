@@ -24,6 +24,9 @@
 		03BF9A4E29C064D400409961 /* ToDo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03BF9A4D29C064D400409961 /* ToDo.swift */; };
 		03BF9A5129C0808D00409961 /* Differentiator in Frameworks */ = {isa = PBXBuildFile; productRef = 03BF9A5029C0808D00409961 /* Differentiator */; };
 		03BF9A5329C0808D00409961 /* RxDataSources in Frameworks */ = {isa = PBXBuildFile; productRef = 03BF9A5229C0808D00409961 /* RxDataSources */; };
+		03BF9A5529C0F0FC00409961 /* MainViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03BF9A5429C0F0FC00409961 /* MainViewModel.swift */; };
+		03BF9A5929C0F65600409961 /* Section.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03BF9A5829C0F65600409961 /* Section.swift */; };
+		03BF9A5B29C10A8D00409961 /* DateExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03BF9A5A29C10A8D00409961 /* DateExtension.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -38,6 +41,9 @@
 		03BF9A4029C0595800409961 /* StringExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringExtension.swift; sourceTree = "<group>"; };
 		03BF9A4229C0598100409961 /* NSMutableAttributedString.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NSMutableAttributedString.swift; sourceTree = "<group>"; };
 		03BF9A4D29C064D400409961 /* ToDo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToDo.swift; sourceTree = "<group>"; };
+		03BF9A5429C0F0FC00409961 /* MainViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewModel.swift; sourceTree = "<group>"; };
+		03BF9A5829C0F65600409961 /* Section.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Section.swift; sourceTree = "<group>"; };
+		03BF9A5A29C10A8D00409961 /* DateExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateExtension.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -78,6 +84,7 @@
 		037EFC0829B86DE400E067B0 /* ToDoList */ = {
 			isa = PBXGroup;
 			children = (
+				03BF9A5729C0F64700409961 /* Enum */,
 				03BF9A4C29C064B800409961 /* Model */,
 				03BF9A3F29C0593100409961 /* Extension */,
 				037EFC3729B885C500E067B0 /* ViewComponent */,
@@ -95,6 +102,7 @@
 			isa = PBXGroup;
 			children = (
 				037EFC1D29B86EBD00E067B0 /* MainViewController.swift */,
+				03BF9A5429C0F0FC00409961 /* MainViewModel.swift */,
 			);
 			path = ViewController;
 			sourceTree = "<group>";
@@ -112,6 +120,7 @@
 			children = (
 				03BF9A4029C0595800409961 /* StringExtension.swift */,
 				03BF9A4229C0598100409961 /* NSMutableAttributedString.swift */,
+				03BF9A5A29C10A8D00409961 /* DateExtension.swift */,
 			);
 			path = Extension;
 			sourceTree = "<group>";
@@ -122,6 +131,14 @@
 				03BF9A4D29C064D400409961 /* ToDo.swift */,
 			);
 			path = Model;
+			sourceTree = "<group>";
+		};
+		03BF9A5729C0F64700409961 /* Enum */ = {
+			isa = PBXGroup;
+			children = (
+				03BF9A5829C0F65600409961 /* Section.swift */,
+			);
+			path = Enum;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -210,6 +227,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				03BF9A5929C0F65600409961 /* Section.swift in Sources */,
+				03BF9A5B29C10A8D00409961 /* DateExtension.swift in Sources */,
 				037EFC0A29B86DE400E067B0 /* AppDelegate.swift in Sources */,
 				03BF9A4E29C064D400409961 /* ToDo.swift in Sources */,
 				037EFC0C29B86DE400E067B0 /* SceneDelegate.swift in Sources */,
@@ -217,6 +236,7 @@
 				03BF9A4129C0595800409961 /* StringExtension.swift in Sources */,
 				037EFC1E29B86EBD00E067B0 /* MainViewController.swift in Sources */,
 				037EFC3A29B885E000E067B0 /* TodoCell.swift in Sources */,
+				03BF9A5529C0F0FC00409961 /* MainViewModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

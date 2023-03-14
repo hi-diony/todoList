@@ -35,229 +35,28 @@ class MainViewController: UIViewController {
         return tv
     }()
     
+    private let viewModel: MainViewModel
     private let disposeBag = DisposeBag()
     private var sections = BehaviorSubject(value: [
-        AnimatableSectionModel(model: Section.Todo.sectionTitle, items: [ToDo]()),
-        AnimatableSectionModel(model: Section.Done.sectionTitle, items: [ToDo]())
+        SectionModel(model: Section.Todo.sectionTitle, items: [ToDo]()),
+        SectionModel(model: Section.Done.sectionTitle, items: [ToDo]())
     ])
+    
+    init(viewModel: MainViewModel) {
+        self.viewModel = viewModel
+        
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
         initUI()
-        bind()
-    }
-    
-    private func bind() {
-        guard let realm = try? Realm() else {
-            return
-        }
-
-        /// 테이블뷰
-        // tableView와 Realm 바인딩 : https://stackoverflow.com/questions/48577819/how-to-bind-realm-object-to-uiswitch-using-rxswift-and-rxrealm
-        let allTodos = realm.objects(ToDo.self)
-        Observable.changeset(from: allTodos)
-            .subscribe(with: self,
-                       onNext: { owner, realmChanges in
-                let results = realmChanges.0
-                guard var sections = try? owner.sections.value() else {
-                    return
-                }
-                
-                let newTodo = results
-                            .where({ $0.finishedAt == nil })
-                            .sorted(byKeyPath: "createdAt", ascending: false)
-
-                let newFinished = results
-                            .where({ $0.finishedAt != nil })
-                            .sorted(byKeyPath: "finishedAt", ascending: false)
-
-                guard let changes = realmChanges.1 else {
-                    /// 변경사항이 없다면 (처음 초기값)
-                    sections = [
-                        AnimatableSectionModel(model: Section.Todo.sectionTitle, items: newTodo.map({ $0 })),
-                        AnimatableSectionModel(model: Section.Done.sectionTitle, items: newFinished.map({ $0 }))
-                    ]
-                    owner.sections.onNext(sections)
-                    return
-                }
-
-                let updateTodo = results.enumerated().compactMap({
-                    if changes.updated.contains($0.offset) {
-                        return $0.element
-                    }
-                    return nil
-                })
-
-                /// 초기값에서 변경사항이 존재함
-                /// Todo 리스트
-                var originalTodo = sections[Section.Todo.rawValue].items
-
-                // 삭제
-                let willDeleteTodoIndexs = Set(originalTodo).subtracting(newTodo)
-                    .compactMap({
-                        originalTodo.firstIndex(of: $0)
-                    })
-                originalTodo.remove(atOffsets: IndexSet(willDeleteTodoIndexs))
-
-                // 삽입
-                let willInsertTodoIndexs = Set(newTodo).subtracting(originalTodo)
-                    .compactMap({
-                        newTodo.firstIndex(of: $0)
-                    })
-                willInsertTodoIndexs.forEach({ row in
-                    originalTodo.insert(newTodo[row], at: row)
-                })
-
-                // 업데이트
-                updateTodo.forEach({ willUpdatTodo in
-                    guard let index = originalTodo.firstIndex(where: { $0._id == willUpdatTodo._id }) else {
-                        return
-                    }
-                    originalTodo[index] = willUpdatTodo
-                })
-
-                sections[Section.Todo.rawValue] = AnimatableSectionModel(model: Section.Todo.sectionTitle, items: originalTodo)
-
-                /// Done 리스트
-                var originalFinished = sections[Section.Done.rawValue].items
-                // 삭제
-                let willDeleteFinishedIndexs = Set(originalFinished).subtracting(newFinished)
-                    .compactMap({
-                        originalFinished.firstIndex(of: $0)
-                    })
-                originalFinished.remove(atOffsets: IndexSet(willDeleteFinishedIndexs))
-
-                // 삽입
-                let willInsertFinishedIndexs = Set(newFinished).subtracting(originalFinished)
-                    .compactMap({
-                        newFinished.firstIndex(of: $0)
-                    })
-                willInsertFinishedIndexs.forEach({ row in
-                    originalFinished.insert(newFinished[row], at: row)
-                })
-
-                // 업데이트
-                updateTodo.forEach({ willUpdatTodo in
-                    guard let index = originalFinished.firstIndex(where: { $0._id == willUpdatTodo._id }) else {
-                        return
-                    }
-                    originalFinished[index] = willUpdatTodo
-                })
-
-                sections[Section.Done.rawValue] = AnimatableSectionModel(model: Section.Done.sectionTitle, items: originalFinished)
-
-                owner.sections.onNext(sections)
-            })
-            .disposed(by: disposeBag)
-        
-        
-        // 데이터소스 추가(셀 설정)
-        let dataSource = RxTableViewSectionedAnimatedDataSource<AnimatableSectionModel<String, ToDo>>(
-            configureCell: { dataSource, tableView, indexPath, todo in
-                let cell: TodoCell = {
-                    guard let c = tableView.dequeueReusableCell(withIdentifier: TodoCell.IDENTIFIER) as? TodoCell else {
-                        return TodoCell()
-                    }
-                    return c
-                }()
-                
-                cell.setData(todo: todo)
-                return cell
-            },
-            titleForHeaderInSection: { [weak self] dataSource, sectionIndex in
-                guard let self = self,
-                      let sectionTitle = Section(rawValue: sectionIndex)?.sectionTitle,
-                      let sections = try? self.sections.value() else {
-                    return ""
-                }
-                
-                return "\(sectionTitle) (\(sections[sectionIndex].items.count))"
-            },
-            canEditRowAtIndexPath: { _, _ in
-                return true
-            }
-        )
-
-        sections
-            .distinctUntilChanged() // 연달아 중복된 값이 올 경우 무시
-            .observe(on:MainScheduler.asyncInstance)
-            .bind(to: tableView.rx.items(dataSource: dataSource))
-            .disposed(by: disposeBag)
-        
-        // 삭제
-        tableView.rx.itemDeleted
-            .bind(with: self,
-                  onNext: { owner, indexPath in
-                guard var section = try? owner.sections.value() else { return }
-                var updateSection = section[indexPath.section]
-                
-                // Update item
-                updateSection.items.remove(at: indexPath.item)
-                
-                // Update section
-                
-                section[indexPath.section] = updateSection
-                
-                // Emit
-                owner.sections.onNext(section)
-            })
-            .disposed(by: self.disposeBag)
-        
-        tableView.rx
-            .itemSelected
-            .subscribe(with: self,
-                       onNext: { owner, indexPath in
-                // 해당 아이템이 터치될때마다 finish 상태가 바뀜
-                guard let sections = try? owner.sections.value() else {
-                    return
-                }
-                
-                let todo = sections[indexPath.section].items[indexPath.row]
-                guard let realm = try? Realm() else {
-                    return
-                }
-                
-                try? realm.write {
-                    switch todo.isDone {
-                    case true:
-                        // 다시 TODO항목으로 추가된다면 생성일이 최근으로 바뀐다
-                        todo.createdAt = Date()
-                        todo.finishedAt = nil
-                        
-                    case false:
-                        todo.finishedAt = Date()
-                    }
-                }
-            })
-            .disposed(by: disposeBag)
-        
-        // 텍스트필드
-        textField.rx
-            .controlEvent(.editingDidEndOnExit)
-            .subscribe(with: self,
-                       onNext: { owner, _ in
-                guard let text = owner.textField.text,
-                      !text.removeWhiteSpace().isEmpty else {
-                    // 빈텍스트는 추가 안함
-                    return
-                }
-
-                guard let realm = try? Realm() else {
-                    return
-                }
-
-                // 데이터 추가
-                let newTodo = ToDo()
-                newTodo.text = text
-
-                try? realm.write({
-                    realm.add(newTodo)
-                })
-
-                owner.textField.text = ""
-            })
-            .disposed(by: disposeBag)
+        bind(to: viewModel)
     }
     
     private func initUI() {
@@ -287,23 +86,78 @@ class MainViewController: UIViewController {
             make.top.equalTo(navigationView.snp.bottom)
         })
     }
-}
-
-extension MainViewController {
-    enum Section: Int, CaseIterable {
-        case Todo = 0
-        case Done
-        
-        var sectionTitle: String {
-            switch self {
-            case .Todo:
-                return "TODO"
+    
+    private func bind(to viewModel: MainViewModel) {
+        /// 테이블뷰
+        // 데이터소스(셀 설정)
+        // tableView와 Realm 바인딩 : https://stackoverflow.com/questions/48577819/how-to-bind-realm-object-to-uiswitch-using-rxswift-and-rxrealm
+        // animated datasource로 하면 삭제시 앱 크래시 되는 이슈 있음 - https://github.com/RxSwiftCommunity/RxDataSources/issues/197
+        let dataSource = RxTableViewSectionedReloadDataSource<SectionModel<String, ToDo>>(
+            configureCell: { dataSource, tableView, indexPath, todo in
+                let cell: TodoCell = {
+                    guard let c = tableView.dequeueReusableCell(withIdentifier: TodoCell.IDENTIFIER) as? TodoCell else {
+                        return TodoCell()
+                    }
+                    return c
+                }()
                 
-            case .Done:
-                return "DONE"
+                cell.setData(todo: todo)
+                return cell
+            },
+            titleForHeaderInSection: { dataSource, sectionIndex in
+                return dataSource[sectionIndex].model
+            },
+            canEditRowAtIndexPath: { _, _ in
+                return true
             }
-        }
-    }
-}
+        )
 
+        let todos = viewModel.todos
+            .distinctUntilChanged() // 연달아 중복된 값이 올 경우 무시
+            .observe(on:MainScheduler.asyncInstance)
+        
+        todos
+            .map({ newDatas in
+                // 테이블뷰에 맞게 데이터 변환
+                return newDatas.keys.sorted(by: { $0.rawValue < $1.rawValue })
+                    .map({ key in
+                        let value = newDatas[key] ?? [ToDo]()
+                        return SectionModel(model: "\(key) (\(value.count))",
+                                                      items: value.map({ $0 }))
+                    })
+            })
+            .bind(to: tableView.rx.items(dataSource: dataSource))
+            .disposed(by: disposeBag)
+        
+        todos
+            .bind(with: self,
+                  onNext: { owner, _ in
+            owner.textField.text = ""
+        })
+            .disposed(by: disposeBag)
+        
+        // 삭제
+        tableView.rx
+            .itemDeleted
+            .bind(to: viewModel.itemDeleted)
+            .disposed(by: disposeBag)
+        
+        // 선택
+        tableView.rx
+            .itemSelected
+            .bind(to: viewModel.itemSelected)
+            .disposed(by: disposeBag)
+        
+        /// 텍스트필드
+        textField.rx
+            .controlEvent(.editingDidEndOnExit)
+            // 두 Observable중 첫번째 Observable에서 아이템이 방출될 때마다 그 아이템을 두번째 Observable의 가장 최근 아이템과 결합해 방출합니다.
+            // 즉, 편집이 끝날때마다 텍스트 필트의 텍스트값을 가져온단소리!!
+            .withLatestFrom(textField.rx.text.orEmpty)
+            .bind(to: viewModel.endEditing)
+            .disposed(by: disposeBag)
+    }
+    
+    
+}
 
