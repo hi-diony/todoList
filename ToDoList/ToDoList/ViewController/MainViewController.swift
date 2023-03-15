@@ -37,10 +37,6 @@ class MainViewController: UIViewController {
     
     private let viewModel: MainViewModel
     private let disposeBag = DisposeBag()
-    private var sections = BehaviorSubject(value: [
-        SectionModel(model: Section.Todo.sectionTitle, items: [ToDo]()),
-        SectionModel(model: Section.Done.sectionTitle, items: [ToDo]())
-    ])
     
     init(viewModel: MainViewModel) {
         self.viewModel = viewModel

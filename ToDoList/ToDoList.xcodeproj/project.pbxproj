@@ -19,7 +19,7 @@
 		037EFC3529B8777C00E067B0 /* RxSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 037EFC3429B8777C00E067B0 /* RxSwift */; };
 		037EFC3A29B885E000E067B0 /* TodoCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 037EFC3929B885E000E067B0 /* TodoCell.swift */; };
 		03BF9A4129C0595800409961 /* StringExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03BF9A4029C0595800409961 /* StringExtension.swift */; };
-		03BF9A4329C0598100409961 /* NSMutableAttributedString.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03BF9A4229C0598100409961 /* NSMutableAttributedString.swift */; };
+		03BF9A4329C0598100409961 /* NSMutableAttributedStringExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03BF9A4229C0598100409961 /* NSMutableAttributedStringExtension.swift */; };
 		03BF9A4B29C064B400409961 /* RxRealm in Frameworks */ = {isa = PBXBuildFile; productRef = 03BF9A4A29C064B400409961 /* RxRealm */; };
 		03BF9A4E29C064D400409961 /* ToDo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03BF9A4D29C064D400409961 /* ToDo.swift */; };
 		03BF9A5129C0808D00409961 /* Differentiator in Frameworks */ = {isa = PBXBuildFile; productRef = 03BF9A5029C0808D00409961 /* Differentiator */; };
@@ -39,7 +39,7 @@
 		037EFC1D29B86EBD00E067B0 /* MainViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewController.swift; sourceTree = "<group>"; };
 		037EFC3929B885E000E067B0 /* TodoCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoCell.swift; sourceTree = "<group>"; };
 		03BF9A4029C0595800409961 /* StringExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringExtension.swift; sourceTree = "<group>"; };
-		03BF9A4229C0598100409961 /* NSMutableAttributedString.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NSMutableAttributedString.swift; sourceTree = "<group>"; };
+		03BF9A4229C0598100409961 /* NSMutableAttributedStringExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NSMutableAttributedStringExtension.swift; sourceTree = "<group>"; };
 		03BF9A4D29C064D400409961 /* ToDo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToDo.swift; sourceTree = "<group>"; };
 		03BF9A5429C0F0FC00409961 /* MainViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewModel.swift; sourceTree = "<group>"; };
 		03BF9A5829C0F65600409961 /* Section.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Section.swift; sourceTree = "<group>"; };
@@ -119,7 +119,7 @@
 			isa = PBXGroup;
 			children = (
 				03BF9A4029C0595800409961 /* StringExtension.swift */,
-				03BF9A4229C0598100409961 /* NSMutableAttributedString.swift */,
+				03BF9A4229C0598100409961 /* NSMutableAttributedStringExtension.swift */,
 				03BF9A5A29C10A8D00409961 /* DateExtension.swift */,
 			);
 			path = Extension;
@@ -232,7 +232,7 @@
 				037EFC0A29B86DE400E067B0 /* AppDelegate.swift in Sources */,
 				03BF9A4E29C064D400409961 /* ToDo.swift in Sources */,
 				037EFC0C29B86DE400E067B0 /* SceneDelegate.swift in Sources */,
-				03BF9A4329C0598100409961 /* NSMutableAttributedString.swift in Sources */,
+				03BF9A4329C0598100409961 /* NSMutableAttributedStringExtension.swift in Sources */,
 				03BF9A4129C0595800409961 /* StringExtension.swift in Sources */,
 				037EFC1E29B86EBD00E067B0 /* MainViewController.swift in Sources */,
 				037EFC3A29B885E000E067B0 /* TodoCell.swift in Sources */,

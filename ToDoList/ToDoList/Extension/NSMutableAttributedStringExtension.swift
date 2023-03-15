@@ -1,5 +1,5 @@
 //
-//  NSMutableAttributedString.swift
+//  NSMutableAttributedStringExtension.swift
 //  ToDoList
 //
 //  Created by 박지연 on 2023/03/14.
