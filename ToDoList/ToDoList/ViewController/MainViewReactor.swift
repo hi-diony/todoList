@@ -6,15 +6,11 @@
 //
 
 import Foundation
-import RxSwift
 import RealmSwift
 import RxRelay
+import ReactorKit
 
-/// refs
-/// - 좀더 mvvm의 구조를 구조적으로 가져가는 방법..?
-///     -  https://coding-idiot.tistory.com/7
-///     - https://ios-development.tistory.com/140
-final class MainViewModel {
+final class MainViewReactor {
     /// input
     let itemDeleted = PublishRelay<IndexPath>()
     let itemSelected = PublishRelay<IndexPath>()
