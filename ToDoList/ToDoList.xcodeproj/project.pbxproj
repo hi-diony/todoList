@@ -32,6 +32,8 @@
 		CE1A0AF929E6A88E0076882E /* UIColorExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE1A0AF829E6A88E0076882E /* UIColorExtension.swift */; };
 		CE1A0AFB29E6AB460076882E /* ObservableTypeExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE1A0AFA29E6AB460076882E /* ObservableTypeExtension.swift */; };
 		CE1A0AFD29E6AE7E0076882E /* UITextFieldExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE1A0AFC29E6AE7E0076882E /* UITextFieldExtension.swift */; };
+		CE1A0AFF29E7A8E00076882E /* UIViewExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE1A0AFE29E7A8E00076882E /* UIViewExtension.swift */; };
+		CE1A0B0129E7D19A0076882E /* IntExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE1A0B0029E7D19A0076882E /* IntExtension.swift */; };
 		CE7B721329E54E4D00962E6A /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = CE7B721229E54E4D00962E6A /* SnapKit */; };
 		CE7B721629E54F3100962E6A /* ReactorKit in Frameworks */ = {isa = PBXBuildFile; productRef = CE7B721529E54F3100962E6A /* ReactorKit */; };
 /* End PBXBuildFile section */
@@ -56,6 +58,8 @@
 		CE1A0AF829E6A88E0076882E /* UIColorExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIColorExtension.swift; sourceTree = "<group>"; };
 		CE1A0AFA29E6AB460076882E /* ObservableTypeExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObservableTypeExtension.swift; sourceTree = "<group>"; };
 		CE1A0AFC29E6AE7E0076882E /* UITextFieldExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UITextFieldExtension.swift; sourceTree = "<group>"; };
+		CE1A0AFE29E7A8E00076882E /* UIViewExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIViewExtension.swift; sourceTree = "<group>"; };
+		CE1A0B0029E7D19A0076882E /* IntExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntExtension.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -139,6 +143,8 @@
 				CE1A0AF829E6A88E0076882E /* UIColorExtension.swift */,
 				CE1A0AFA29E6AB460076882E /* ObservableTypeExtension.swift */,
 				CE1A0AFC29E6AE7E0076882E /* UITextFieldExtension.swift */,
+				CE1A0AFE29E7A8E00076882E /* UIViewExtension.swift */,
+				CE1A0B0029E7D19A0076882E /* IntExtension.swift */,
 			);
 			path = Extension;
 			sourceTree = "<group>";
@@ -256,11 +262,13 @@
 				03BF9A4E29C064D400409961 /* TodoItem.swift in Sources */,
 				037EFC0C29B86DE400E067B0 /* SceneDelegate.swift in Sources */,
 				03BF9A4329C0598100409961 /* NSMutableAttributedStringExtension.swift in Sources */,
+				CE1A0AFF29E7A8E00076882E /* UIViewExtension.swift in Sources */,
 				CE1A0AFB29E6AB460076882E /* ObservableTypeExtension.swift in Sources */,
 				03BF9A4129C0595800409961 /* StringExtension.swift in Sources */,
 				037EFC1E29B86EBD00E067B0 /* MainViewController.swift in Sources */,
 				037EFC3A29B885E000E067B0 /* TodoCell.swift in Sources */,
 				CE1A0AFD29E6AE7E0076882E /* UITextFieldExtension.swift in Sources */,
+				CE1A0B0129E7D19A0076882E /* IntExtension.swift in Sources */,
 				CE1A0AF929E6A88E0076882E /* UIColorExtension.swift in Sources */,
 				CE1A0AF729E6A8710076882E /* Theme.swift in Sources */,
 				03BF9A5529C0F0FC00409961 /* MainViewReactor.swift in Sources */,

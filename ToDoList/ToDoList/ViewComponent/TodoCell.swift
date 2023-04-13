@@ -15,6 +15,7 @@ import RealmSwift
 class TodoCell: UITableViewCell {
     static let IDENTIFIER = "TodoCell"
     
+    // MARK: -UI
     private let checkImageView = UIImageView()
     private let label: UILabel = {
         let lb = UILabel()
@@ -31,10 +32,19 @@ class TodoCell: UITableViewCell {
         return lb
     }()
     
+    // MARK: -Property
+    var theme = PublishSubject<Theme>()
+    var todo = PublishSubject<TodoItem>()
+    
+    private var disposeBag = DisposeBag()
+    
+    // MARK: -Function
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         
         initUI()
+        
+        bind()
     }
     
     required init?(coder: NSCoder) {
@@ -83,30 +93,68 @@ class TodoCell: UITableViewCell {
     }
     
     
-    func setData(todo: TodoItem) {
-        switch todo.isDone {
-        case true:
-            checkImageView.image = UIImage(systemName: "checkmark.circle.fill")
-            label.attributedText = todo.text
-                .toMutableAttributedString()
-                .setFontColor(to: .systemGray3)
-                .setCancelLine(to: .systemGray3)
+//    func setData(todo: TodoItem) {
+//        switch todo.isDone {
+//        case true:
+//            checkImageView.image = UIImage(systemName: "checkmark.circle.fill")
+//            label.attributedText = todo.text
+//                .toMutableAttributedString()
+//                .setFontColor(to: .systemGray3)
+//                .setCancelLine(to: .systemGray3)
+//
+//            if let finishTime = todo.finishedAt?.toString("yyyy.MM.dd HH:mm") {
+//                dateLabel.text = finishTime
+//                dateLabel.isHidden = false
+//            }
+//
+//        case false:
+//            checkImageView.image = UIImage(systemName: "circle")
+//            label.attributedText = todo.text
+//                .toMutableAttributedString()
+//                .setFontColor(to: .label)
+//                .removeCancelLine()
+//
+//            dateLabel.text = nil
+//            dateLabel.isHidden = true
+//        }
+//    }
+    
+    private func bind() {
+        Observable.combineLatest(todo, theme)
+            .bindOnMain(onNext: { [weak self] todo, theme in
+                guard let self = self else { return }
+                self.checkImageView.tintColor = theme.buttonTintColor
                 
-            if let finishTime = todo.finishedAt?.toString("yyyy.MM.dd HH:mm") {
-                dateLabel.text = finishTime
-                dateLabel.isHidden = false
-            }
-            
-        case false:
-            checkImageView.image = UIImage(systemName: "circle")
-            label.attributedText = todo.text
-                .toMutableAttributedString()
-                .setFontColor(to: .label)
-                .removeCancelLine()
-            
-            dateLabel.text = nil
-            dateLabel.isHidden = true
-        }
+                switch todo.isDone {
+                case true:
+                    self.checkImageView.image = UIImage(systemName: "checkmark.circle.fill")?
+                        .withRenderingMode(.alwaysTemplate)
+                        .withTintColor(theme.buttonTintColor)
+
+                    self.label.attributedText = todo.text
+                        .toMutableAttributedString()
+                        .setFontColor(to: theme.placeHolderTextColor)
+                        .setCancelLine(to: theme.placeHolderTextColor)
+                        
+                    if let finishTime = todo.finishedAt?.toString("yyyy.MM.dd HH:mm") {
+                        self.dateLabel.text = finishTime
+                        self.dateLabel.isHidden = false
+                    }
+                    
+                case false:
+                    self.checkImageView.image = UIImage(systemName: "circle")?
+                        .withRenderingMode(.alwaysTemplate)
+                        .withTintColor(theme.buttonTintColor)
+                    
+                    self.label.attributedText = todo.text
+                        .toMutableAttributedString()
+                        .setFontColor(to: theme.textColor)
+                        .removeCancelLine()
+                    
+                    self.dateLabel.text = nil
+                    self.dateLabel.isHidden = true
+                }
+            })
+            .disposed(by: disposeBag)
     }
 }
-

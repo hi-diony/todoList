@@ -62,6 +62,10 @@ enum Theme: CaseIterable {
         }
     }
     
+    var placeHolderTextColor: UIColor {
+        return textColor.withAlphaComponent(0.5)
+    }
+    
     var buttonTintColor: UIColor {
         switch self {
         case .pink:

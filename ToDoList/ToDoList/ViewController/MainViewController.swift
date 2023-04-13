@@ -33,8 +33,10 @@ class MainViewController: UIViewController, ReactorKit.View  {
     private let tableView: UITableView = {
         let tv = UITableView()
         tv.backgroundColor = .clear
+        
         tv.allowsMultipleSelection = false
         tv.keyboardDismissMode = .interactiveWithAccessory
+        tv.sectionHeaderTopPadding = 0
         tv.register(TodoCell.self, forCellReuseIdentifier: TodoCell.IDENTIFIER)
         return tv
     }()
@@ -111,6 +113,8 @@ class MainViewController: UIViewController, ReactorKit.View  {
             make.bottom.equalToSuperview()
             make.height.equalTo(50)
         })
+        
+        navigationView.addLineToBottom()
         
         // 네비게이션의 하단 테이블 뷰
         view.addSubview(tableView)
@@ -199,7 +203,11 @@ extension MainViewController {
         // tableView와 Realm 바인딩 : https://stackoverflow.com/questions/48577819/how-to-bind-realm-object-to-uiswitch-using-rxswift-and-rxrealm
         // animated datasource로 하면 삭제시 앱 크래시 되는 이슈 있음 - https://github.com/RxSwiftCommunity/RxDataSources/issues/197
         let dataSource = RxTableViewSectionedReloadDataSource<SectionModel<MainViewReactor.TodoGroup, TodoItem>>(
-            configureCell: { dataSource, tableView, indexPath, todo in
+            configureCell: { [weak self] dataSource, tableView, indexPath, todo in
+                guard let self = self else {
+                    return UITableViewCell()
+                }
+                
                 let cell: TodoCell = {
                     guard let c = tableView.dequeueReusableCell(withIdentifier: TodoCell.IDENTIFIER) as? TodoCell else {
                         return TodoCell()
@@ -207,11 +215,18 @@ extension MainViewController {
                     return c
                 }()
 
-                cell.setData(todo: todo)
+                reactor.state
+                    .compactMap { $0.theme }
+                    .bind(to: cell.theme)
+                    .disposed(by: self.disposeBag)
+                
+                cell.todo.onNext(todo)
+                
                 return cell
             },
             titleForHeaderInSection: { dataSource, sectionIndex in
                 let section = dataSource.sectionModels[sectionIndex].model
+                
                 switch section {
                 case .todo:
                     return "TODO"
@@ -231,6 +246,10 @@ extension MainViewController {
             .bind(to: tableView.rx.items(dataSource: dataSource))
             .disposed(by: disposeBag)
         
+        tableView.rx
+            .setDelegate(self)
+            .disposed(by: disposeBag)
+        
         reactor.state
             .map { $0.theme }
             .distinctUntilChanged()
@@ -238,12 +257,54 @@ extension MainViewController {
             .bind(with: self) { vc, theme in
                 vc.view.backgroundColor = theme.backgroundColor
                 vc.navigationView.backgroundColor = theme.navigationBarColor
-                vc.textField.placeHolderColor = theme.textColor.withAlphaComponent(0.5)
+                vc.textField.placeHolderColor = theme.placeHolderTextColor
                 vc.textField.textColor = theme.textColor
                 vc.textField.tintColor = theme.accentColor
                 vc.colorThemeButton.tintColor = theme.buttonTintColor
             }
             .disposed(by: disposeBag)
         
+    }
+}
+
+extension MainViewController: UITableViewDelegate {
+    func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+        guard let reactor = reactor,
+              reactor.currentState.section.hasIndex(section) else {
+            return nil
+        }
+
+        let section = reactor.currentState.section[section]
+
+        let title: String = {
+            switch section.model {
+            case .todo:
+                return "📍 TODO (\(section.items.count.asMoney()))"
+
+            case .done:
+                return "📍 DONE (\(section.items.count.asMoney()))"
+            }
+        }()
+
+        let label = UILabel()
+        label.text = title
+        label.textColor = reactor.currentState.theme.textColor
+        label.font = .boldSystemFont(ofSize: 15)
+
+        let containerView = UIView()
+        containerView.backgroundColor = reactor.currentState.theme.navigationBarColor
+        containerView.addSubview(label)
+        label.snp.makeConstraints {
+            $0.leading.equalTo(10)
+            $0.trailing.equalTo(10)
+            $0.top.equalToSuperview()
+            $0.bottom.equalToSuperview()
+        }
+
+        return containerView
+    }
+    
+    func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
+        return 40
     }
 }
