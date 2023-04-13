@@ -16,13 +16,18 @@ class TodoCell: UITableViewCell {
     static let IDENTIFIER = "TodoCell"
     
     private let checkImageView = UIImageView()
-    private let label = UILabel()
+    private let label: UILabel = {
+        let lb = UILabel()
+        lb.numberOfLines = 0
+        return lb
+    }()
+    
     private let dateLabel: UILabel = {
         let lb = UILabel()
         lb.isHidden = true
         lb.textAlignment = .right
         lb.font = .preferredFont(forTextStyle: .caption1)
-        lb.textColor = .systemGray
+        lb.textColor = .systemGray // TODO
         return lb
     }()
     
@@ -52,7 +57,7 @@ class TodoCell: UITableViewCell {
     
     private func initUI() {
         selectionStyle = .none
-        backgroundColor = .systemGray5
+        backgroundColor = .clear
         
         contentView.addSubview(checkImageView)
         checkImageView.snp.makeConstraints({ make in
@@ -78,7 +83,7 @@ class TodoCell: UITableViewCell {
     }
     
     
-    func setData(todo: ToDo) {
+    func setData(todo: TodoItem) {
         switch todo.isDone {
         case true:
             checkImageView.image = UIImage(systemName: "checkmark.circle.fill")

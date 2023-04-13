@@ -9,118 +9,163 @@ import Foundation
 import RealmSwift
 import RxRelay
 import ReactorKit
+import RxDataSources
 
-final class MainViewReactor {
-    /// input
-    let itemDeleted = PublishRelay<IndexPath>()
-    let itemSelected = PublishRelay<IndexPath>()
-    let endEditing = PublishRelay<String>()
-    
-    /// output
-    // 기본적으로 subject는 background thread를 사용한다.
-    // UI와 같은 처리를 하고 싶다면 driver 사용하기
-    let todos = BehaviorSubject(value: [
-        Section.Todo: [ToDo](),
-        Section.Done: [ToDo]()
-    ])
-    
-    private let disposeBag = DisposeBag()
+class MainViewReactor: ReactorKit.Reactor {
+    var initialState: State
     
     init() {
         guard let realm = try? Realm() else {
+            initialState = State()
             return
         }
         
-        // realm
-        let allTodos = realm.objects(ToDo.self)
-        Observable.changeset(from: allTodos)
-            .subscribe(with: self,
-                       onNext: { owner, realmChanges in
-                let results = realmChanges.0
-                
-                let newTodo = results
-                            .where({ $0.finishedAt == nil })
-                            .sorted(byKeyPath: "createdAt", ascending: false)
-
-                let newDone = results
-                            .where({ $0.finishedAt != nil })
-                            .sorted(byKeyPath: "finishedAt", ascending: false)
-
-                // 새로운 값 전송
-                let newTodos = [
-                        Section.Todo: Array(newTodo),
-                        Section.Done: Array(newDone)
-                ]
-                
-                owner.todos.onNext(newTodos)
-            })
-            .disposed(by: disposeBag)
+        let allTodo = realm.objects(TodoItem.self)
         
-        // 삭제
-        itemDeleted.bind(with: self,
-                         onNext: { owner, indexPath in
-            guard let sections = try? owner.todos.value(),
-                  let section = Section(rawValue: indexPath.section),
-                  let todos = sections[section] else {
-                return
-            }
-            
-            let todo = todos[indexPath.row]
-            guard let realm = try? Realm() else {
-                return
-            }
-            
-            try? realm.write {
-                realm.delete(todo)
-            }
-
-        })
-        .disposed(by: disposeBag)
+        let todoLists = allTodo.where {
+            $0.finishedAt == nil
+        }
+            .sorted(byKeyPath: "createdAt", ascending: false)
         
-        // 상태 변경
-        itemSelected.bind(with: self,
-                          onNext: { owner, indexPath in
-            // 해당 아이템이 터치될때마다 finish 상태가 바뀜
-            guard let sections = try? owner.todos.value(),
-                  let section = Section(rawValue: indexPath.section),
-                  let todos = sections[section] else {
-                return
-            }
-            
-            let todo = todos[indexPath.row]
-            guard let realm = try? Realm() else {
-                return
-            }
-            
-            try? realm.write {
-                switch todo.isDone {
-                case true:
-                    // 다시 TODO항목으로 추가된다면 생성일이 최근으로 바뀐다
-                    todo.createdAt = Date()
-                    todo.finishedAt = nil
-                    
-                case false:
-                    todo.finishedAt = Date()
-                }
-            }
-        })
-        .disposed(by: disposeBag)
+        let doneLists = allTodo.where {
+            $0.finishedAt != nil
+        }
+            .sorted(byKeyPath: "finishedAt", ascending: false)
         
-        endEditing.bind(with: self,
-                        onNext: { owner, text in
-            guard let realm = try? Realm() else {
-                return
-            }
-
-            // 데이터 추가
-            let newTodo = ToDo()
-            newTodo.text = text
-
-            try? realm.write({
-                realm.add(newTodo)
-            })
-        })
-        .disposed(by: disposeBag)
+        initialState = State(
+            todoSection: SectionModel(model: .todo,
+                                      items: todoLists.map { $0 }),
+            doneSection: SectionModel(model: .done,
+                                      items: doneLists.map { $0 })
+        )
     }
     
+    func mutate(action: Action) -> Observable<Mutation> {
+        switch action {
+        case .add(let text):
+            guard let realm = try? Realm() else {
+                return .empty()
+            }
+            
+            let todo = TodoItem()
+            todo.text = text
+            
+            try? realm.write {
+                realm.add(todo)
+            }
+            
+            return .just(.completeRealmWrite(isAdd: true))
+            
+        case .delete(let indexPath):
+            guard let item = itemForIndexPath(indexPath),
+                  let realm = try? Realm() else {
+                return .empty()
+            }
+            
+            try? realm.write {
+                realm.delete(item)
+            }
+            
+            return .just(.completeRealmWrite(isAdd: false))
+            
+        case .changeFinish(let indexPath):
+            guard let item = itemForIndexPath(indexPath),
+                  let realm = try? Realm() else {
+                return .empty()
+            }
+            
+            try? realm.write {
+                if item.finishedAt == nil {
+                    item.finishedAt = Date()
+                } else {
+                    item.finishedAt = nil
+                }
+            }
+            
+            return .just(.completeRealmWrite(isAdd: false))
+            
+        case .changeTheme(let theme):
+            return .just(.changeTheme(theme))
+        }
+    }
+    
+    
+    func reduce(state: State, mutation: Mutation) -> State {
+        var state = state
+        
+        switch mutation {
+        case .completeRealmWrite:
+            guard let realm = try? Realm() else {
+                break
+            }
+            
+            let allTodo = realm.objects(TodoItem.self)
+            
+            state.todoSection.items = allTodo.where {
+                    $0.finishedAt == nil
+                }
+                .sorted(byKeyPath: "createdAt", ascending: false)
+                .map { $0 }
+        
+            state.doneSection.items = allTodo.where {
+                    $0.finishedAt != nil
+                }
+                .sorted(byKeyPath: "finishedAt", ascending: false)
+                .map { $0 }
+            
+        case .changeTheme(let theme):
+            state.theme = theme
+        }
+        
+        return state
+    }
+    
+    private func itemForIndexPath(_ indexPath: IndexPath) -> TodoItem? {
+        guard currentState.section.hasIndex(indexPath.section) else {
+            return nil
+        }
+        
+        let section = currentState.section[indexPath.section]
+        guard section.items.hasIndex(indexPath.row) else {
+            return nil
+        }
+        
+        return section.items[indexPath.row]
+    }
+}
+
+
+extension MainViewReactor {
+    enum Action {
+        // 할일 추가 삭제
+        case add(String)
+        case delete(IndexPath)
+        case changeFinish(IndexPath)
+        
+        case changeTheme(Theme)
+    }
+    
+    enum Mutation {
+        case completeRealmWrite(isAdd: Bool)
+        
+        case changeTheme(Theme)
+    }
+    
+    struct State {
+        var todoSection = SectionModel(model: TodoGroup.todo, items: [TodoItem]())
+        var doneSection = SectionModel(model: TodoGroup.done, items: [TodoItem]())
+
+        var section: [SectionModel<TodoGroup, TodoItem>] {
+            return [todoSection, doneSection]
+        }
+        
+        var theme: Theme = .green
+    }
+}
+
+extension MainViewReactor {
+    enum TodoGroup: Equatable {
+        case todo
+        case done
+    }
 }

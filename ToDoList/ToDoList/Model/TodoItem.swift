@@ -15,7 +15,7 @@ import Differentiator
  https://github.com/RxSwiftCommunity/RxRealm
  http://rx-marin.com/post/dotswift-rxswift-rxrealm-unidirectional-dataflow/
  */
-class ToDoItem: Object, IdentifiableType {
+class TodoItem: Object, IdentifiableType {
     typealias Identity = ObjectId
     
     var identity: RealmSwift.ObjectId {
