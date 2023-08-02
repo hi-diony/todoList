@@ -38,7 +38,7 @@ extension SettingViewReactor {
         var title: String {
             switch self {
             case .theme:
-                return "테마"
+                return "테마."
                 
             case .font:
                 return "폰트"
