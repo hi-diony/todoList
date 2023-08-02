@@ -92,33 +92,6 @@ class TodoCell: UITableViewCell {
         })
     }
     
-    
-//    func setData(todo: TodoItem) {
-//        switch todo.isDone {
-//        case true:
-//            checkImageView.image = UIImage(systemName: "checkmark.circle.fill")
-//            label.attributedText = todo.text
-//                .toMutableAttributedString()
-//                .setFontColor(to: .systemGray3)
-//                .setCancelLine(to: .systemGray3)
-//
-//            if let finishTime = todo.finishedAt?.toString("yyyy.MM.dd HH:mm") {
-//                dateLabel.text = finishTime
-//                dateLabel.isHidden = false
-//            }
-//
-//        case false:
-//            checkImageView.image = UIImage(systemName: "circle")
-//            label.attributedText = todo.text
-//                .toMutableAttributedString()
-//                .setFontColor(to: .label)
-//                .removeCancelLine()
-//
-//            dateLabel.text = nil
-//            dateLabel.isHidden = true
-//        }
-//    }
-    
     private func bind() {
         Observable.combineLatest(todo, theme)
             .bindOnMain(onNext: { [weak self] todo, theme in

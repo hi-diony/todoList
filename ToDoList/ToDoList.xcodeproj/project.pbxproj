@@ -34,6 +34,8 @@
 		CE1A0AFD29E6AE7E0076882E /* UITextFieldExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE1A0AFC29E6AE7E0076882E /* UITextFieldExtension.swift */; };
 		CE1A0AFF29E7A8E00076882E /* UIViewExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE1A0AFE29E7A8E00076882E /* UIViewExtension.swift */; };
 		CE1A0B0129E7D19A0076882E /* IntExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE1A0B0029E7D19A0076882E /* IntExtension.swift */; };
+		CE1A0B0529E913CB0076882E /* SettingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE1A0B0429E913CB0076882E /* SettingViewController.swift */; };
+		CE1A0B0729E913DD0076882E /* SettingViewReactor.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE1A0B0629E913DD0076882E /* SettingViewReactor.swift */; };
 		CE7B721329E54E4D00962E6A /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = CE7B721229E54E4D00962E6A /* SnapKit */; };
 		CE7B721629E54F3100962E6A /* ReactorKit in Frameworks */ = {isa = PBXBuildFile; productRef = CE7B721529E54F3100962E6A /* ReactorKit */; };
 /* End PBXBuildFile section */
@@ -60,6 +62,8 @@
 		CE1A0AFC29E6AE7E0076882E /* UITextFieldExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UITextFieldExtension.swift; sourceTree = "<group>"; };
 		CE1A0AFE29E7A8E00076882E /* UIViewExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIViewExtension.swift; sourceTree = "<group>"; };
 		CE1A0B0029E7D19A0076882E /* IntExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntExtension.swift; sourceTree = "<group>"; };
+		CE1A0B0429E913CB0076882E /* SettingViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingViewController.swift; sourceTree = "<group>"; };
+		CE1A0B0629E913DD0076882E /* SettingViewReactor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingViewReactor.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -121,6 +125,8 @@
 			children = (
 				037EFC1D29B86EBD00E067B0 /* MainViewController.swift */,
 				03BF9A5429C0F0FC00409961 /* MainViewReactor.swift */,
+				CE1A0B0429E913CB0076882E /* SettingViewController.swift */,
+				CE1A0B0629E913DD0076882E /* SettingViewReactor.swift */,
 			);
 			path = ViewController;
 			sourceTree = "<group>";
@@ -261,6 +267,7 @@
 				037EFC0A29B86DE400E067B0 /* AppDelegate.swift in Sources */,
 				03BF9A4E29C064D400409961 /* TodoItem.swift in Sources */,
 				037EFC0C29B86DE400E067B0 /* SceneDelegate.swift in Sources */,
+				CE1A0B0529E913CB0076882E /* SettingViewController.swift in Sources */,
 				03BF9A4329C0598100409961 /* NSMutableAttributedStringExtension.swift in Sources */,
 				CE1A0AFF29E7A8E00076882E /* UIViewExtension.swift in Sources */,
 				CE1A0AFB29E6AB460076882E /* ObservableTypeExtension.swift in Sources */,
@@ -270,6 +277,7 @@
 				CE1A0AFD29E6AE7E0076882E /* UITextFieldExtension.swift in Sources */,
 				CE1A0B0129E7D19A0076882E /* IntExtension.swift in Sources */,
 				CE1A0AF929E6A88E0076882E /* UIColorExtension.swift in Sources */,
+				CE1A0B0729E913DD0076882E /* SettingViewReactor.swift in Sources */,
 				CE1A0AF729E6A8710076882E /* Theme.swift in Sources */,
 				03BF9A5529C0F0FC00409961 /* MainViewReactor.swift in Sources */,
 				CE1A0AF029E646E80076882E /* ArrayExtension.swift in Sources */,
