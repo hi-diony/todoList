@@ -18,7 +18,7 @@ class MainViewController: UIViewController {
     private let textField: UITextField = {
         let tf = UITextField()
         tf.backgroundColor = .systemGray6
-        tf.placeholder = "해야할 일을 적어주세요."
+        tf.placeholder = "해야할 일을 적어주세요. QA-2 테스트"
         tf.leftViewMode = .always
         tf.leftView = UIView(frame: CGRect(x: 1, y: 1, width: 20, height: 1))
         tf.clearButtonMode = .whileEditing
